@@ -1,18 +1,7 @@
-package com.springboot.paymentApi.model.enums;
+package com.springboot.paymentapi.model.enums;
 
 public enum TransactionStatus {
-    PAYMENT_ACCEPTED ("Accepted"),
-    PAYMENT_REJECTED("Rejected");
+    Accepted,
+    Rejected;
 
-
-    private String status;
-
-    private TransactionStatus(String status) {
-    	this.status = status;
-    }
-    
-    public String getStatus() {
-    	return status;
-    }
-    
 }

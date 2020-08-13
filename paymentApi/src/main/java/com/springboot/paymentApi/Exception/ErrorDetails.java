@@ -1,4 +1,4 @@
-package com.springboot.paymentApi.Exception;
+package com.springboot.paymentapi.Exception;
 
 import java.util.Date;
 public class ErrorDetails {

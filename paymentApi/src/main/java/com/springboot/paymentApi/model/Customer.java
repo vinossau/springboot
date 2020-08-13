@@ -1,4 +1,4 @@
-package com.springboot.paymentApi.model;
+package com.springboot.paymentapi.model;
 
 public class Customer {
     private Long id;

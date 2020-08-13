@@ -1,12 +1,12 @@
-package com.springboot.paymentApi.Exception;
+package com.springboot.paymentapi.Exception;
 
+public class InvalidSignatureException extends RuntimeException
+{
+    private static final long serialVersionUID = -4818467074614148420L;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-@ResponseStatus(value = HttpStatus.NOT_FOUND)
-public class InvalidSignatureException extends Exception{
-    private static final long serialVersionUID = 1L;
-    public InvalidSignatureException(){
-        super("Invalid Signature Certificate");
+    public InvalidSignatureException(final String message)
+    {
+        super(message);
     }
+
 }

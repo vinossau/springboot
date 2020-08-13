@@ -1,81 +1,44 @@
-package com.springboot.paymentApi.security;
+package com.springboot.paymentapi.security;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
+import com.springboot.paymentapi.filter.X509AuthenticationFilter;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.config.http.SessionCreationPolicy;
 
-@SpringBootApplication
+@Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
+@EnableGlobalMethodSecurity(securedEnabled = true)
+public class SecurityConfig extends WebSecurityConfigurerAdapter
+{
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests().anyRequest().authenticated()
-                .and()
-                .x509()
-                .subjectPrincipalRegex("CN=(.*?)(?:,|$)")
-                .userDetailsService(userDetailsService());
-    }
-    @Bean
-    public UserDetailsService userDetailsService() {
-        return new UserDetailsService() {
-            @Override
-            public UserDetails loadUserByUsername(String username) {
-                if (username.equals("vinothini")) {
-                    return new User(username, "",
-                            AuthorityUtils
-                                    .commaSeparatedStringToAuthorityList("ROLE_USER"));
-                }
-                throw new UsernameNotFoundException("User not found!");
-            }
-        };
+    protected void configure(HttpSecurity http) throws Exception
+    {
+        X509AuthenticationFilter customFilter = new X509AuthenticationFilter(http);
+        http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().csrf()
+                .disable().exceptionHandling()
+                .authenticationEntryPoint(new CustomAuthenticationEntryPoint()).and()
+                .authorizeRequests().antMatchers("/swagger-ui.html**","/customer/payment-initiate-request", "/swagger-resources/configuration/ui", "/swagger-resources", "/swagger-resources/configuration/security").permitAll()
+                .anyRequest().authenticated().and().x509().x509AuthenticationFilter(customFilter);
+
     }
 
-   /*
+   /* @Configuration
+    @EnableWebSecurity
+    public class SpringBootSecurityConfiguration extends WebSecurityConfigurerAdapter  {
 
-   @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-            .requiresChannel()
-            .anyRequest()
-            .requiresSecure();
-    }
-   @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.authorizeRequests()
-                .antMatchers("/", "/public/**").permitAll()
-                .antMatchers("/users/**").hasAuthority("ADMIN")
-                .anyRequest().fullyAuthenticated()
-                .and()
-                .formLogin()
-                .loginPage("/login")
-                .failureUrl("/login?error")
-                .usernameParameter("email")
-                .permitAll()
-                .and()
-                .logout()
-                .logoutUrl("/logout")
-                .deleteCookies("remember-me")
-                .logoutSuccessUrl("/")
-                .permitAll()
-                .and()
-                .rememberMe();
-    }
+        @Override
+        protected void configure(HttpSecurity http) throws Exception {
+            http.csrf().disable();
+        }
 
-    @Override
-    public void configure(AuthenticationManagerBuilder auth) throws Exception {
-        auth
-                .userDetailsService(userDetailsService)
-                .passwordEncoder(new BCryptPasswordEncoder());
-    }
-  */
+        @Override
+        public void configure(AuthenticationManagerBuilder auth) throws Exception {
+            PasswordEncoder encoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
+            auth.inMemoryAuthentication().withUser("user").password(encoder.encode("password")).roles("USER").and()
+                    .withUser("admin").password(encoder.encode("admin")).roles("USER", "ADMIN");
+        }
+    }*/
 }

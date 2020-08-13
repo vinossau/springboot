@@ -1,4 +1,4 @@
-package com.springboot.paymentApi;
+package com.springboot.paymentapi;
 
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
