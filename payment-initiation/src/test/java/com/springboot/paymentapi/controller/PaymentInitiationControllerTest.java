@@ -3,7 +3,6 @@ package com.springboot.paymentapi.controller;
 import java.util.UUID;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.springboot.paymentapi.exception.LimitExceededException;
 import com.springboot.paymentapi.model.PaymentAcceptedResponse;
 import com.springboot.paymentapi.model.PaymentInitiationRequest;
 import com.springboot.paymentapi.service.PaymentInitiationService;
@@ -11,7 +10,6 @@ import com.springboot.paymentapi.model.enums.TransactionStatus;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -56,14 +54,8 @@ public class PaymentInitiationControllerTest
         subject = new PaymentInitiationController(mockPaymentInitiationService);
     }
 
-    /**
-     * Test initiate payment with valid input and expected payment accepted status
-     * 
-     * @throws Exception
-     *             not expected exception
-     */
     @Test
-    public void testInitiatePayment_Expect_Payment_Accepted() throws Exception // NOSONAR
+    public void testInitiatePayment_Expect_Payment_Accepted() throws Exception
     {
         final PaymentInitiationRequest request = new PaymentInitiationRequest("NL91ABNA0417164301",
                 "NL91ABNA0417164302", "100.00", "EUR", "U1000");
@@ -74,73 +66,13 @@ public class PaymentInitiationControllerTest
                 TransactionStatus.Accepted);
         when(mockPaymentInitiationService.initiatePayment(any())).thenReturn(expected);
 
-        /*
-         * mockMvc.perform(MockMvcRequestBuilders.post("/initiate-payment")
-         * .content(objectMapper.writeValueAsString(request))
-         * .contentType(MediaType.APPLICATION_JSON_VALUE)
-         * ).andExpect(MockMvcResultMatchers.status().isCreated())
-         * .andExpect(jsonPath("$.paymentId", is(paymentId)))
-         * .andExpect(jsonPath("$.status", is("Accepted")));
-         */
-
         ResponseEntity<PaymentAcceptedResponse> response = subject.initiatePayment(request);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
 
-    /**
-     * Test initiate payment, expected payment rejected response due to limit
-     * exceeded
-     * 
-     * @throws Exception
-     *             not expected exception
-     */
-    // @Test
-    public void testInitiatePayment_Expect_Payment_Rejected_With_Reason_Limit_Exceeded() // NOSONAR
-            throws Exception // NOSONAR
-    {
-        final PaymentInitiationRequest request = new PaymentInitiationRequest("NL91ABNA0417164300",
-                "NL91ABNA0417164301", "50.00", "INR", "U1001");
-
-        Mockito.doThrow(LimitExceededException.class).when(mockPaymentInitiationService)
-                .initiatePayment(any());
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/initiate-payment")
-                .content(objectMapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().isUnprocessableEntity())
-                .andExpect(jsonPath("$.status", is("Rejected")))
-                .andExpect(jsonPath("$.reasonCode", is("LIMIT_EXCEEDED")));
-    }
-
-    /**
-     * Test initiate payment, expected payment rejected response due to invalid
-     * Debtor IBAN
-     * 
-     * @throws Exception
-     *             not expected exception
-     */
     @Test
-    public void testInitiatePayment_Expect_Payment_Rejected_With_Null_Mandatory_Field() // NOSONAR
-            throws Exception
-    {
-        final PaymentInitiationRequest request = new PaymentInitiationRequest("NL02RABO7134384551",
-                "NL94ABNA1008270121", "1.00", null, null);
-
-        mockMvc.perform(MockMvcRequestBuilders.post("/initiate-payment")
-                .header("X-Request-Id", "29318e25-cebd-498c-888a-f77672f66449")
-                .header("Signature", getValidSignature())
-                .header("Signature-Certificate", getValidCertificate())
-                .content(objectMapper.writeValueAsString(request))
-                .contentType(MediaType.APPLICATION_JSON_VALUE))
-                .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(jsonPath("$.status", is("Rejected")))
-                .andExpect(jsonPath("$.reasonCode", is("INVALID_REQUEST")))
-                .andExpect(jsonPath("$.reason", containsString("EndToEndId is null")));
-    }
-    
-    @Test
-    public void testInitiatePayment_Expect_Payment_Rejected_Expected_Invalid_Signature() // NOSONAR
+    public void testInitiatePayment_Payment_Rejected_Invalid_Signature()
             throws Exception
     {
         final PaymentInitiationRequest request = new PaymentInitiationRequest("NL02RABO7134384550",
@@ -156,6 +88,27 @@ public class PaymentInitiationControllerTest
                 .andExpect(jsonPath("$.status", is("Rejected")))
                 .andExpect(jsonPath("$.reasonCode", is("INVALID_SIGNATURE")));
     }
+
+    @Test
+    public void testInitiatePayment_Payment_Rejected_With_Reason_Limit_Exceeded()
+            throws Exception
+    {
+        final PaymentInitiationRequest request = new PaymentInitiationRequest("NL02RABO7134384551",
+                "NL94ABNA1008270121", "500.00",null,null);
+
+        mockMvc.perform(MockMvcRequestBuilders.post("/initiate-payment")
+                .header("X-Request-Id", "29318e25-cebd-498c-888a-f77672f66449")
+                .header("Signature", getValidSignature())
+                .header("Signature-Certificate", getValidCertificate())
+                .content(objectMapper.writeValueAsString(request))
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(jsonPath("$.status", is("Rejected")))
+                .andExpect(jsonPath("$.reasonCode", is("INVALID_SIGNATURE")))
+                .andExpect(jsonPath("$.reason", containsString("Invalid Signature")));
+    }
+
+
     
     private String getValidSignature()
     {

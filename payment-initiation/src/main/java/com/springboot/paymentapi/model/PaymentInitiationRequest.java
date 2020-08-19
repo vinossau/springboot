@@ -29,6 +29,15 @@ public class PaymentInitiationRequest implements Serializable
 
     private static final long serialVersionUID = 7274980585249473776L;
 
+    public PaymentInitiationRequest(@NotNull(message = "Debtor IBAN is null") @Pattern(regexp = PaymentInitiationConstant.IBAN_REGEX,
+            message = "Incorrect Debtor IBAN") String debtorIBAN, @NotNull(message = "Creditor IBAN is null") @Pattern(regexp = PaymentInitiationConstant.IBAN_REGEX,
+            message = "Incorrect Creditor IBAN") String creditorIBAN, @NotNull(message = "Amount is null") @Pattern(regexp = PaymentInitiationConstant.AMOUNT_REGEX,
+            message = "Invalid Amount") String amount) {
+        this.debtorIBAN = debtorIBAN;
+        this.creditorIBAN = creditorIBAN;
+        this.amount = amount;
+    }
+
     @NotNull(message = "Debtor IBAN is null")
     @Pattern(regexp = PaymentInitiationConstant.IBAN_REGEX, message = "Incorrect Debtor IBAN")
     private String debtorIBAN;

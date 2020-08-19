@@ -25,6 +25,15 @@ public class GlobalExceptionHandler
 
     private PaymentRejectedResponse response;
 
+    @ExceptionHandler(value = UnknownCertificateException.class)
+    public ResponseEntity<PaymentRejectedResponse> handleUnknownCertificateException(
+            final UnknownCertificateException exception)
+    {
+        response = new PaymentRejectedResponse(TransactionStatus.Rejected, exception.getMessage(),
+                ErrorReasonCode.UNKNOWN_CERTIFICATE);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
     public ResponseEntity<PaymentRejectedResponse> handleMethodArgumentNotValidException(
             final MethodArgumentNotValidException exception)
@@ -38,24 +47,6 @@ public class GlobalExceptionHandler
         });
         response = new PaymentRejectedResponse(TransactionStatus.Rejected, errors.toString(),
                 ErrorReasonCode.INVALID_REQUEST);
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(value = LimitExceededException.class)
-    public ResponseEntity<PaymentRejectedResponse> handleLimitExceededException(
-            final LimitExceededException exception)
-    {
-        response = new PaymentRejectedResponse(TransactionStatus.Rejected, exception.getMessage(),
-                ErrorReasonCode.LIMIT_EXCEEDED);
-        return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
-    }
-
-    @ExceptionHandler(value = UnknownCertificateException.class)
-    public ResponseEntity<PaymentRejectedResponse> handleUnknownCertificateException(
-            final UnknownCertificateException exception)
-    {
-        response = new PaymentRejectedResponse(TransactionStatus.Rejected, exception.getMessage(),
-                ErrorReasonCode.UNKNOWN_CERTIFICATE);
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
@@ -75,6 +66,15 @@ public class GlobalExceptionHandler
                 ErrorReasonCode.GENERAL_ERROR);
 
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(value = LimitExceededException.class)
+    public ResponseEntity<PaymentRejectedResponse> handleLimitExceededException(
+            final LimitExceededException exception)
+    {
+        response = new PaymentRejectedResponse(TransactionStatus.Rejected, exception.getMessage(),
+                ErrorReasonCode.LIMIT_EXCEEDED);
+        return new ResponseEntity<>(response, HttpStatus.UNPROCESSABLE_ENTITY);
     }
 
     @ExceptionHandler(value = AccessDeniedException.class)

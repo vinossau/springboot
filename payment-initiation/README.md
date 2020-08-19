@@ -16,7 +16,7 @@
 > java -jar /target/payment-initiation-0.0.1-SNAPSHOT.jar
 
 ## Test the application using Postman Rest Client
-+
+
 Step #1: Add the client certificate and private key file in Postman -> Settings -> Certificate tab
 
 Step #2: invoke the initiate-payment service with below URL
