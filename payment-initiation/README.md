@@ -1,26 +1,42 @@
-# ThirdPartyPaymentInitiation
+###########Payment Initiation service#########
 
-# Create certificate file using the and private key file with the given value in the example-signature.md file
+>>>>Step 1:
+#Create a certificate using "CN Name = Sandbox-TPP" using below command,
+>  keytool -genkeypair -alias senderKeyPair -keyalg RSA -keysize 2048 -dname "CN=Sandbox-TPP" -validity 365 -storetype PKCS12 -keystore sender_keystore.p12 -storepass changeit
+>  keytool -exportcert -alias senderKeyPair -storetype PKCS12 -keystore sender_keystore.p12 -file sender_certificate.cer -rfc -storepass changeit
+>  keytool -importcert -trustcacerts -alias root -file sender_certificate.cer -keystore trustStore.jks
 
-> certificate.crt
-> privateKey.pem
+#It will generate the below list of files,
+>  sender_keystore.p12
+>  sender_certificate.cer
+>  trustStore.jks
 
-## Run Spring Boot Application
+>>>>Step 2: 
+#Run the Spring boot application with inbuilt tomcat server
 
-# Build the JAR using maven from pom.xml file location
+>>>>Step 3: 
+#Configure Maven using pom.xml file and do the run the below command
 
-> mvn clean package
+>  mvn clean
+>  mvn package
 
-# Start the Spring Boot application
+#It will generate Runnable jar file into the following location
 
-> java -jar /target/payment-initiation-0.0.1-SNAPSHOT.jar
+>   /target/payment-initiation-0.0.1-SNAPSHOT.jar
 
-## Test the application using Postman Rest Client
+>>>>Step 4:
+#Run the jar file using command
 
-Step #1: Add the client certificate and private key file in Postman -> Settings -> Certificate tab
+>  java -jar /target/payment-initiation-0.0.1-SNAPSHOT.jar
 
-Step #2: invoke the initiate-payment service with below URL
+>>>>Step 5: 
+#Test the application using Postman tool
 
-> https://localhost:8080/v1.0.0/initiate-payment
+#Configure the inputs required for the application
+#1. Add the X-Request-Id, Signature and Signature-Certificate in the header tab(provided in example-signature.md file)
+#2. Add the Request body as a JSON (provided in example-signature.md file)
+#3. Add the certificate(.p12) into Postman --> Settings --> Certificate tab --> Add Certificate and provide password as "changeit"
+#4. Trigger the below url as a "POST" method and click on "Send"
 
-Step #3: Use the payload, x-request-id, signature and signature-certificate given in the example-signature.md file for testing
+>   https://localhost:8080/v1.0.0/initiate-payment
+
